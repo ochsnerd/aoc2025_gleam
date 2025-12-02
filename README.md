@@ -1,4 +1,8 @@
-# aoc2025_gleam
+# Solutions for Advent of Code 2025
+
+The following is from `gleam new`, I don't expect this to be published to hex.
+
+## aoc2025_gleam
 
 [![Package Version](https://img.shields.io/hexpm/v/aoc2025_gleam)](https://hex.pm/packages/aoc2025_gleam)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/aoc2025_gleam/)
@@ -16,7 +20,7 @@ pub fn main() -> Nil {
 
 Further documentation can be found at <https://hexdocs.pm/aoc2025_gleam>.
 
-## Development
+### Development
 
 ```sh
 gleam run   # Run the project

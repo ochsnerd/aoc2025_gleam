@@ -1,5 +1,17 @@
-import gleam/io
+import day01
+import gleam/int
+import gleam/result
+import util
 
-pub fn main() -> Nil {
-  io.println("Hello from aoc2025_gleam!")
+pub fn main() {
+  let _ = echo solve(day01.solve, "day01")
+}
+
+fn solve(
+  f: fn(List(String)) -> Result(#(Int, Int), Nil),
+  day: String,
+) -> Result(String, Nil) {
+  use lines <- result.try(util.read_lines("input/" <> day <> ".txt"))
+  use #(part1, part2) <- result.try(f(lines))
+  Ok(day <> ": " <> int.to_string(part1) <> ", " <> int.to_string(part2))
 }
