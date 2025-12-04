@@ -44,8 +44,8 @@ fn full_revolutions(p: Int) -> Int {
 
 fn parse_line(line: String) -> Result(Int, Nil) {
   case line {
-    "R" <> deg -> deg |> int.parse |> result.map(fn(deg) { deg })
-    "L" <> deg -> deg |> int.parse |> result.map(fn(deg) { -deg })
+    "R" <> deg -> deg |> int.parse
+    "L" <> deg -> deg |> int.parse |> result.map(int.negate)
     _ -> Error(Nil)
   }
 }
