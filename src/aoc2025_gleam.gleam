@@ -1,10 +1,12 @@
 import day01
+import day02
 import gleam/int
 import gleam/result
 import util
 
 pub fn main() {
   let _ = echo solve(day01.solve, "day01")
+  let _ = echo solve(day02.solve, "day02")
 }
 
 fn solve(
