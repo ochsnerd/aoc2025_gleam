@@ -4,6 +4,8 @@ import gleam/int
 import gleam/result
 import util
 
+// simple perf check:
+// gleam build && gleam run -m gleescript && time ./aoc2025_gleam
 pub fn main() {
   let _ = echo solve(day01.solve, "day01")
   let _ = echo solve(day02.solve, "day02")

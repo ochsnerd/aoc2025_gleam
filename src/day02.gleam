@@ -1,36 +1,77 @@
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import gleam/order
+import gleam/pair
 import gleam/result
 import gleam/string
 
 pub fn solve(input: List(String)) -> Result(#(Int, Int), Nil) {
-  use line <- result.try(single(input))
+  let assert [line] = input
   use ranges <- result.try(parse(line))
 
   let part1 =
     ranges
-    |> list.flat_map(fn(r) { invalid_ids_1(r) })
+    |> list.flat_map(fn(r) { invalid_ids_p1(r) })
     |> int.sum()
 
-  Ok(#(part1, 0))
+  let _ =
+    list.each(ranges, fn(r) {
+      assert invalid_ids(2, r) == invalid_ids_p1(r)
+    })
+
+  let part2 =
+    ranges
+    |> list.flat_map(fn(r) { invalid_ids_p2(r) })
+    |> int.sum()
+
   // hello???
-  // echo invalid_ids(Range(95, 115))
+  // echo invalid_ids(2, Range(87, 115))
+  Ok(#(part1, part2))
 }
 
 type Range {
   Range(start: Int, stop: Int)
 }
 
-fn invalid_ids_1(r: Range) -> List(Int) {
-  successors(Some(some_previous_invalid_id(r.start)), fn(id) {
-    case next_invalid_id(id) {
+fn invalid_ids_p1(r: Range) -> List(Int) {
+  successors(Some(11), fn(id) {
+    case next_invalid_id1_successors(id) {
       next if next <= r.stop -> Some(next)
       _ -> None
     }
   })
   |> list.filter(fn(id) { r.start <= id })
+}
+
+fn invalid_ids_p2(r: Range) -> List(Int) {
+  let digits_stop = list.length(digits(r.stop))
+  list.range(2, digits_stop)
+  |> list.flat_map(fn(repeats) { invalid_ids(repeats, r) })
+  |> list.unique()
+}
+
+fn invalid_ids(repeats: Int, r: Range) -> List(Int) {
+  unfoldr(
+    fn(chunk) {
+      let next = next_invalid_id1_unfoldr(repeats, chunk)
+      case pair.first(next) <= r.stop {
+        True -> Some(next)
+        False -> None
+      }
+    },
+    1,
+  )
+  |> list.filter(fn(id) { r.start <= id })
+}
+
+fn next_invalid_id1_unfoldr(repeats: Int, chunk: Int) -> #(Int, Int) {
+  let assert Ok(new__id) =
+    chunk
+    |> digits()
+    |> list.repeat(repeats)
+    |> list.flatten
+    |> undigits()
+  #(new__id, chunk + 1)
 }
 
 fn parse(line: String) -> Result(List(Range), Nil) {
@@ -42,8 +83,9 @@ fn parse(line: String) -> Result(List(Range), Nil) {
       // Cannot do a string pattern with a variable at the start :(
       [start, stop] -> {
         // Applicative
-        use start <- result.try(int.parse(start))
-        use stop <- result.try(int.parse(stop))
+        // use start <- result.try(int.parse(start))
+        // use stop <- result.try(int.parse(stop))
+        let assert #(Ok(start), Ok(stop)) = #(int.parse(start), int.parse(stop))
         Ok(Range(start, stop))
       }
       _ -> Error(Nil)
@@ -51,69 +93,35 @@ fn parse(line: String) -> Result(List(Range), Nil) {
   })
 }
 
-fn some_previous_invalid_id(i: Int) -> Int {
-  let assert Ok(ds) = digits(i, 10)
-  let len = list.length(ds)
-  let assert Ok(first_half) = undigits(list.take(ds, len / 2), 10)
-  let first_half = first_half - 1
-  let assert Ok(ds) = digits(first_half, 10)
-  let assert Ok(id) = undigits(list.append(ds, ds), 10)
-  int.max(0, id)
-}
-
-fn next_invalid_id(i: Int) -> Int {
-  assert is_invalid_id(i)
-  let assert Ok(ds) = digits(i, 10)
+fn next_invalid_id1_successors(i: Int) -> Int {
+  let ds = digits(i)
   // interesting docs on list.length
-  let len = list.length(ds)
-  let assert Ok(first_half) = undigits(list.take(ds, { len + 1 } / 2), 10)
+  let assert Ok(first_half) =
+    undigits(list.take(ds, { list.length(ds) + 1 } / 2))
   let first_half = first_half + 1
-  let assert Ok(ds) = digits(first_half, 10)
-  let assert Ok(id) = undigits(list.append(ds, ds), 10)
+  let ds = digits(first_half)
+  let assert Ok(id) = undigits(list.append(ds, ds))
   id
 }
 
-fn is_invalid_id(i: Int) -> Bool {
-  case int.compare(i, 0) {
-    order.Lt -> False
-    // by my definition
-    order.Eq -> True
-    _ -> {
-      let assert Ok(ds) = digits(i, 10)
-      // interesting docs on list.length
-      let len = list.length(ds)
-      case len % 2 {
-        0 -> {
-          let #(a, b) = list.split(ds, len / 2)
-          list.all(list.zip(a, b), fn(x) {
-            let #(l, r) = x
-            l == r
-          })
-        }
-        _ -> False
-      }
-    }
+// cf. https://hackage.haskell.org/package/base-4.21.0.0/docs/Data-List.html#v:unfoldr
+// cf. https://hackage.haskell.org/package/recursion-schemes-5.2.3/docs/Data-Functor-Foldable.html#v:unfold
+pub fn unfoldr(f: fn(b) -> Option(#(a, b)), b0: b) -> List(a) {
+  unfoldr_loop(f, b0, []) |> list.reverse()
+}
+
+fn unfoldr_loop(f: fn(b) -> Option(#(a, b)), b: b, acc: List(a)) -> List(a) {
+  case f(b) {
+    Some(#(a, b_new)) -> unfoldr_loop(f, b_new, [a, ..acc])
+    None -> acc
   }
 }
 
-// Generalization of list.range:
-// ```gleam
-//   list.range(a, b)
-// ```
-// is equivalent to
-// ```gleam
-//   generate(option.Some(1), fn(i) {
-//     case i + 1 {
-//       i if i < 10 -> option.Some(i)
-//       _ -> option.None
-//    }
-//  })
-//   generate(Some(a), 
-// ```
-fn successors(start: Option(t), next: fn(t) -> Option(t)) -> List(t) {
-  case start {
+// cf. https://doc.rust-lang.org/std/iter/fn.successors.html
+pub fn successors(first: Option(t), succ: fn(t) -> Option(t)) -> List(t) {
+  case first {
     None -> []
-    Some(s) -> list.reverse(successors_loop(s, next, [s]))
+    Some(s) -> successors_loop(s, succ, [s]) |> list.reverse()
   }
 }
 
@@ -124,19 +132,9 @@ fn successors_loop(start: t, next: fn(t) -> Option(t), acc: List(t)) -> List(t) 
   }
 }
 
-fn single(l: List(t)) -> Result(t, Nil) {
-  case l {
-    [i] -> Ok(i)
-    _ -> Error(Nil)
-  }
-}
-
-// from standard library
-pub fn digits(x: Int, base: Int) -> Result(List(Int), Nil) {
-  case base < 2 {
-    True -> Error(Nil)
-    False -> Ok(digits_loop(x, base, []))
-  }
+// from standard library (hardcoded base 10), could also do string stuff
+pub fn digits(x: Int) -> List(Int) {
+  digits_loop(x, 10, [])
 }
 
 fn digits_loop(x: Int, base: Int, acc: List(Int)) -> List(Int) {
@@ -146,11 +144,8 @@ fn digits_loop(x: Int, base: Int, acc: List(Int)) -> List(Int) {
   }
 }
 
-pub fn undigits(numbers: List(Int), base: Int) -> Result(Int, Nil) {
-  case base < 2 {
-    True -> Error(Nil)
-    False -> undigits_loop(numbers, base, 0)
-  }
+pub fn undigits(numbers: List(Int)) -> Result(Int, Nil) {
+  undigits_loop(numbers, 10, 0)
 }
 
 fn undigits_loop(numbers: List(Int), base: Int, acc: Int) -> Result(Int, Nil) {
