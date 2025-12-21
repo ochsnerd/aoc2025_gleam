@@ -27,6 +27,7 @@
             buildInputs = [
               erlang_28
               gleam
+              nodejs_24
             ];
           };
       }
