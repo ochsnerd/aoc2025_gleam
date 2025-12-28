@@ -83,9 +83,8 @@ fn parse(line: String) -> Result(List(Range), Nil) {
       // Cannot do a string pattern with a variable at the start :(
       [start, stop] -> {
         // Applicative
-        // use start <- result.try(int.parse(start))
-        // use stop <- result.try(int.parse(stop))
-        let assert #(Ok(start), Ok(stop)) = #(int.parse(start), int.parse(stop))
+        use start <- result.try(int.parse(start))
+        use stop <- result.try(int.parse(stop))
         Ok(Range(start, stop))
       }
       _ -> Error(Nil)
