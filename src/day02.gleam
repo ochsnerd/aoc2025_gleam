@@ -4,6 +4,7 @@ import gleam/option.{type Option, None, Some}
 import gleam/pair
 import gleam/result
 import gleam/string
+import util.{digits, undigits}
 
 pub fn solve(input: List(String)) -> Result(#(Int, Int), Nil) {
   let assert [line] = input
@@ -65,13 +66,13 @@ fn invalid_ids(repeats: Int, r: Range) -> List(Int) {
 }
 
 fn next_invalid_id1_unfoldr(repeats: Int, chunk: Int) -> #(Int, Int) {
-  let assert Ok(new__id) =
+  let new_id =
     chunk
     |> digits()
     |> list.repeat(repeats)
     |> list.flatten
     |> undigits()
-  #(new__id, chunk + 1)
+  #(new_id, chunk + 1)
 }
 
 fn parse(line: String) -> Result(List(Range), Nil) {
@@ -95,11 +96,10 @@ fn parse(line: String) -> Result(List(Range), Nil) {
 fn next_invalid_id1_successors(i: Int) -> Int {
   let ds = digits(i)
   // interesting docs on list.length
-  let assert Ok(first_half) =
-    undigits(list.take(ds, { list.length(ds) + 1 } / 2))
+  let first_half = undigits(list.take(ds, { list.length(ds) + 1 } / 2))
   let first_half = first_half + 1
   let ds = digits(first_half)
-  let assert Ok(id) = undigits(list.append(ds, ds))
+  let id = undigits(list.append(ds, ds))
   id
 }
 
@@ -128,29 +128,5 @@ fn successors_loop(start: t, next: fn(t) -> Option(t), acc: List(t)) -> List(t) 
   case next(start) {
     None -> acc
     Some(n) -> successors_loop(n, next, [n, ..acc])
-  }
-}
-
-// from standard library (hardcoded base 10), could also do string stuff
-pub fn digits(x: Int) -> List(Int) {
-  digits_loop(x, 10, [])
-}
-
-fn digits_loop(x: Int, base: Int, acc: List(Int)) -> List(Int) {
-  case int.absolute_value(x) < base {
-    True -> [x, ..acc]
-    False -> digits_loop(x / base, base, [x % base, ..acc])
-  }
-}
-
-pub fn undigits(numbers: List(Int)) -> Result(Int, Nil) {
-  undigits_loop(numbers, 10, 0)
-}
-
-fn undigits_loop(numbers: List(Int), base: Int, acc: Int) -> Result(Int, Nil) {
-  case numbers {
-    [] -> Ok(acc)
-    [digit, ..] if digit >= base -> Error(Nil)
-    [digit, ..rest] -> undigits_loop(rest, base, acc * base + digit)
   }
 }

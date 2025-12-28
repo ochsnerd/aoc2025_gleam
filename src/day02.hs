@@ -5,7 +5,14 @@ import Data.List (unfoldr, nub)
 import Data.List.Split (splitOn)
 
 main :: IO ()
-main = interact solve
+main = interact solveClaude
+
+solveClaude :: String -> String
+solveClaude input = show . sum . nub $ [makeId r c | r <- [2..digits], c <- [1..stop], makeId r c >= start && makeId r c <= stop]
+  where
+    [start, stop] = map read $ splitOn "-" input
+    digits = length $ show stop
+    makeId repeats chunk = read $ concat $ replicate repeats $ show chunk
 
 solve :: String -> String
 solve = show . sum . invalidIdsPart2 . parse

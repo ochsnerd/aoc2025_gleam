@@ -1,3 +1,10 @@
+// I wrote this after discovering
+// https://hexdocs.pm/gleam_yielder/index.html
+// which actually used to be part of the standard library:
+// https://hexdocs.pm/gleam_stdlib/0.10.1/gleam/iterator/
+// The semantics of Yielder are the same as a haskell-list together with
+// https://hackage-content.haskell.org/package/base-4.22.0.0/docs/Data-List.html#v:unfoldr
+// down to yielder.Step(a, b) being isomorphic to Maybe (a, b)
 import gleam/int
 import gleam/list
 import gleam/string
