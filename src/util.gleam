@@ -7,8 +7,8 @@ import simplifile
 
 pub fn read_lines(filename: String) -> Result(List(String), Nil) {
   simplifile.read(filename)
-  |> result.map(fn(s) { string.split(s, "\n") })
-  |> result.map(fn(ss) { ss |> list.filter(fn(s) { !string.is_empty(s) }) })
+  |> result.map(string.trim)
+  |> result.map(string.split(_, "\n"))
   |> result.map_error(fn(_) { Nil })
 }
 
@@ -22,6 +22,26 @@ pub fn max_by_key(
   case compare(key(a), key(b)) {
     order.Lt -> b
     _ -> a
+  }
+}
+
+pub fn insert_sorted_by(l: List(a), e: a, key: fn(a) -> Int) -> List(a) {
+  insert_sorted_loop(l, e, key, [])
+}
+
+fn insert_sorted_loop(
+  l: List(a),
+  e: a,
+  key: fn(a) -> Int,
+  acc: List(a),
+) -> List(a) {
+  case l {
+    [] -> list.reverse([e, ..acc])
+    [x, ..xs] ->
+      case key(e) < key(x) {
+        True -> list.append(list.reverse(acc), [e, x, ..xs])
+        False -> insert_sorted_loop(xs, e, key, [x, ..acc])
+      }
   }
 }
 

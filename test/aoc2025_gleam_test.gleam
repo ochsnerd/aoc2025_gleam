@@ -1,7 +1,10 @@
 import day02.{successors, unfoldr}
+import gleam/function
+import gleam/int
 import gleam/list
 import gleam/option.{None, Some}
 import gleeunit
+import util.{insert_sorted_by}
 
 pub fn main() -> Nil {
   gleeunit.main()
@@ -61,4 +64,15 @@ pub fn fibonacci_test() {
   let expected = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
   assert expected == successors
   assert expected == unfoldr
+}
+
+pub fn insert_sorted_test() {
+  assert [2] == insert_sorted_by([], 2, function.identity)
+  assert [1, 2] == insert_sorted_by([1], 2, function.identity)
+  assert [1, 2] == insert_sorted_by([2], 1, function.identity)
+  assert [2, 2] == insert_sorted_by([2], 2, function.identity)
+  assert [5, 4, 3, 2, 1]
+    == list.fold([2, 3, 1, 5, 4], [], fn(l, i) {
+      insert_sorted_by(l, i, int.negate)
+    })
 }
