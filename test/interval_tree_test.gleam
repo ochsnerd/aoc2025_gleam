@@ -2,7 +2,8 @@
 import gleam/list
 import gleam/set
 import interval.{new as new_interval}
-import interval_tree.{Leaf, Node, from_list as new_tree, intersections}
+import interval_tree.{Intervals, from_list as new_tree, intersections}
+import tree.{Leaf, Node}
 
 // Test: Empty list should create an empty tree (Leaf)
 pub fn new_tree_empty_test() {
@@ -18,9 +19,7 @@ pub fn new_tree_single_interval_test() {
   case tree {
     Leaf -> panic as "Expected Node, got Leaf"
     Node(
-      mid: mid,
-      by_start: by_start,
-      by_stop: by_stop,
+      data: Intervals(mid: mid, by_start: by_start, by_stop: by_stop),
       left: left,
       right: right,
     ) -> {
@@ -42,7 +41,7 @@ pub fn new_tree_two_intervals_non_overlapping_test() {
 
   case tree {
     Leaf -> panic as "Expected Node, got Leaf"
-    Node(mid: _, by_start: _, by_stop: _, left: left, right: right) -> {
+    Node(data: _, left: left, right: right) -> {
       // One interval should be in left or right subtree
       let has_left = case left {
         Leaf -> False
@@ -180,10 +179,7 @@ pub fn intersections_large_span_test() {
   let i1 = new_interval(1, 100)
   let i2 = new_interval(10, 20)
   let i3 = new_interval(50, 60)
-  // let i4 = new_interval(60, 70)
-  // echo new_tree([i1, i2, i3])
-  // echo new_tree([i1, i2, i4])
-  let tree = echo new_tree([i1, i2, i3])
+  let tree = new_tree([i1, i2, i3])
 
   // Query at 15 should find i1 and i2
   let results = intersections(tree, 15)

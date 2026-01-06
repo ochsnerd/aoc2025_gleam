@@ -3,17 +3,20 @@ import gleam/list
 import gleam/result
 import gleam/string
 import interval.{type Interval, new}
-import interval_tree.{type Tree, from_list, intersections}
+import interval_tree.{type IntervalTree, from_list, intersections}
 
 pub fn solve(input: List(String)) -> Result(#(Int, Int), Nil) {
   use #(intervals, points) <- result.try(read(input))
   let interval_tree = from_list(intervals)
+  // pretty unbalanced ¯\_(ツ)_/¯
+  // echo { "Tree Size: " <> int.to_string(tree.size(interval_tree)) }
+  // echo { "Tree Depth: " <> int.to_string(tree.depth(interval_tree)) }
   let part1 = part1(interval_tree, points)
   let part2 = part2(intervals)
   Ok(#(part1, part2))
 }
 
-fn part1(intervals: Tree, points: List(Int)) -> Int {
+fn part1(intervals: IntervalTree, points: List(Int)) -> Int {
   points
   |> list.count(fn(p) { intersections(intervals, p) != [] })
 }
