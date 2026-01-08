@@ -4,6 +4,7 @@ import day02_clean
 import day03
 import day04
 import day05
+import day06
 import gleam/int
 import gleam/result
 import util
@@ -17,6 +18,7 @@ pub fn main() {
   let _ = echo solve(day03.solve, "day03")
   let _ = echo solve(day04.solve, "day04")
   let _ = echo solve(day05.solve, "day05")
+  let _ = echo solve(day06.solve, "day06")
 }
 
 fn solve(

@@ -45,6 +45,15 @@ fn insert_sorted_loop(
   }
 }
 
+// not utf-whitespace, literally " ",
+// but then trim any utf whitespace after
+pub fn split_spaces(s: String) -> List(String) {
+  s
+  |> string.split(" ")
+  |> list.map(string.trim)
+  |> list.filter(fn(s) { !string.is_empty(s) })
+}
+
 // from standard library (hardcoded base 10), could also do string stuff
 pub fn digits(x: Int) -> List(Int) {
   digits_loop(x, 10, [])
