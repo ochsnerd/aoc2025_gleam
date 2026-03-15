@@ -31,8 +31,11 @@ fn highest_jolt1(batteries: List(Int)) -> Int {
   let assert [b0, ..batteries] = list.reverse(batteries)
   batteries
   |> list.fold(#(0, b0), fn(acc, bat) {
-    let #(current, biggest) = acc
-    #(int.max(current, to_int(bat, biggest)), int.max(bat, biggest))
+    let #(best_until_now, biggest_yet) = acc
+    #(
+      int.max(best_until_now, to_int(bat, biggest_yet)),
+      int.max(bat, biggest_yet),
+    )
   })
   |> pair.first
 }
@@ -45,7 +48,7 @@ fn highest_jolt2(batteries: List(Int)) -> Int {
   let #(on0, rest) = batteries |> list.reverse() |> list.split(11)
   rest
   |> list.fold(#(0, list.reverse(on0)), fn(acc, bat) {
-    let #(current, biggest) = acc
+    let #(best_until_now, biggest) = acc
     let biggest_n =
       max_by_key(
         biggest,
@@ -53,7 +56,7 @@ fn highest_jolt2(batteries: List(Int)) -> Int {
         undigits,
         int.compare,
       )
-    #(int.max(current, undigits([bat, ..biggest])), biggest_n)
+    #(int.max(best_until_now, undigits([bat, ..biggest])), biggest_n)
   })
   |> pair.first
 }

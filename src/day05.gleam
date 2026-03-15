@@ -32,7 +32,7 @@ type Section {
 
 fn part2(intervals: List(Interval)) -> Int {
   intervals
-  |> list.flat_map(fn(i) { [Start(v: i.start), Stop(i.stop + 1)] })
+  |> list.flat_map(fn(i) { [Start(i.start), Stop(i.stop + 1)] })
   |> list.sort(fn(p1, p2) { int.compare(p1.v, p2.v) })
   |> list.scan(Section(open_intervals: 0, start: 0), fn(acc, p) {
     case p {
