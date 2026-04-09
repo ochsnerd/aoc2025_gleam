@@ -54,7 +54,7 @@ fn parse1(input: List(String)) -> Result(List(Problem), Nil) {
 fn parse2(input: List(String)) -> List(Problem) {
   let assert [operators, ..numbers] =
     input |> list.reverse() |> list.map(string.reverse)
-  yielder.unfold(#(operators, numbers), fn(acc) {
+  yielder.unfold(#(string.trim_start(operators), numbers), fn(acc) {
     case acc {
       #("", _) -> yielder.Done
       #(operators, numbers) -> {
